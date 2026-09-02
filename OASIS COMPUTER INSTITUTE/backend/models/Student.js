@@ -14,7 +14,10 @@ const studentSchema = new mongoose.Schema({
   },
   createdAt: { type: Date, default: Date.now },
   certificateIssued: { type: Boolean, default: false },
-  completionDate: { type: Date, default: null }
+  completionDate: { type: Date, default: null },
+  paymentConfirmed: { type: Boolean, default: false },
+  paymentConfirmedAt: { type: Date, default: null },
+  stamped: { type: Boolean, default: false }
 });
 
 module.exports = mongoose.model('Student', studentSchema);

@@ -16,7 +16,9 @@ router.get('/students', authRequired('admin'), async (req, res) => {
       lessonNumber: s.lessonNumber,
       average,
       remark: remarkFor(average).label,
-      certificateIssued: s.certificateIssued
+      certificateIssued: s.certificateIssued,
+      paymentConfirmed: s.paymentConfirmed,
+      stamped: s.stamped
     };
   });
   res.json(out);
@@ -34,7 +36,9 @@ router.get('/students/:username', authRequired('admin'), async (req, res) => {
     average,
     remark: remarkFor(average),
     certificateIssued: student.certificateIssued,
-    completionDate: student.completionDate
+    completionDate: student.completionDate,
+    paymentConfirmed: student.paymentConfirmed,
+    stamped: student.stamped
   });
 });
 
@@ -47,6 +51,27 @@ router.put('/students/:username/certificate', authRequired('admin'), async (req,
   await student.save();
 
   res.json({ ok: true, certificateIssued: student.certificateIssued, completionDate: student.completionDate });
+});
+
+router.put('/students/:username/payment', authRequired('admin'), async (req, res) => {
+  const student = await Student.findOne({ username: String(req.params.username).toLowerCase() });
+  if (!student) return res.status(404).json({ error: 'Student not found.' });
+
+  student.paymentConfirmed = !!req.body.confirmed;
+  student.paymentConfirmedAt = student.paymentConfirmed ? (student.paymentConfirmedAt || new Date()) : null;
+  await student.save();
+
+  res.json({ ok: true, paymentConfirmed: student.paymentConfirmed, paymentConfirmedAt: student.paymentConfirmedAt });
+});
+
+router.put('/students/:username/stamp', authRequired('admin'), async (req, res) => {
+  const student = await Student.findOne({ username: String(req.params.username).toLowerCase() });
+  if (!student) return res.status(404).json({ error: 'Student not found.' });
+
+  student.stamped = !!req.body.stamped;
+  await student.save();
+
+  res.json({ ok: true, stamped: student.stamped });
 });
 
 router.put('/students/:username/scores', authRequired('admin'), async (req, res) => {
